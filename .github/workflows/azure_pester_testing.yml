@@ -26,8 +26,8 @@ jobs:
           Install-Module -Name Pester -Force -SkipPublisherCheck
 
       - name: Run Pester Tests
+        continue-on-error: true
         run: |
-          continue-on-error: true
           Invoke-Pester -Script .\az-tests\azure_pester.ps1
         shell: pwsh
 
