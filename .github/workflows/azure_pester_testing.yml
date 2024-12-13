@@ -28,7 +28,7 @@ jobs:
       - name: Run Pester Tests
         continue-on-error: true
         run: |
-          $subscriptionId = ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          $subscriptionId = "0b7e0b83-0035-48fe-92fe-bf1143f2e715"
           Set-AzContext -SubscriptionId $subscriptionId
           Invoke-Pester -Script .\az-tests\azure_pester.ps1
         shell: pwsh
