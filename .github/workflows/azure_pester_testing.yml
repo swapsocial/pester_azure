@@ -7,23 +7,34 @@ on:
 
 jobs:
   run-pester-tests:
-    runs-on: windows-latest 
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3
 
-      - name: Install Azure PowerShell
+      - name: Install Azure PowerShell (Az module)
         run: |
-          Install-Module -Name Az -AllowClobber -Force -SkipPublisherCheck
+          if (-not (Get-Module -ListAvailable -Name Az)) {
+              Install-Module -Name Az -Force -AllowClobber -SkipPublisherCheck
+          }
 
       - name: Log in to Azure using Service Principal
         run: |
-          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+          $tenantId = ${{ secrets.AZURE_TENANT_ID }}
+          $clientId = ${{ secrets.AZURE_CLIENT_ID }}
+          $clientSecret = ${{ secrets.AZURE_CLIENT_SECRET }}
+
+          $secureSecret = ConvertTo-SecureString $clientSecret -AsPlainText -Force
+          $credentials = New-Object System.Management.Automation.PSCredential($clientId, $secureSecret)
+
+          Connect-AzAccount -ServicePrincipal -TenantId $tenantId -ApplicationId $clientId -Credential $credentials
 
       - name: Install Pester module
         run: |
-          Install-Module -Name Pester -Force -SkipPublisherCheck
+          if (-not (Get-Module -ListAvailable -Name Pester)) {
+              Install-Module -Name Pester -Force -SkipPublisherCheck
+          }
 
       - name: Run Pester Tests
         continue-on-error: true
@@ -32,4 +43,3 @@ jobs:
           Set-AzContext -SubscriptionId $subscriptionId
           Invoke-Pester -Script .\az-tests\azure_pester.ps1
         shell: pwsh
-
