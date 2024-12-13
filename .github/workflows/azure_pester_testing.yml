@@ -19,7 +19,7 @@ jobs:
 
       - name: Log in to Azure using Service Principal
         run: |
-          Connect-AzAccount -ServicePrincipal -TenantId ${{ secrets.AZURE_TENANT_ID }} -ApplicationId ${{ secrets.AZURE_CLIENT_ID }} -CertificateThumbprint ${{ secrets.AZURE_CLIENT_SECRET }}
+          Connect-AzAccount -ServicePrincipal -TenantId ${{ secrets.AZURE_TENANT_ID }} -ApplicationId ${{ secrets.AZURE_CLIENT_ID }}
 
       - name: Install Pester module
         run: |
