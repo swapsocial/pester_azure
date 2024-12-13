@@ -17,6 +17,7 @@ jobs:
         run: |
           if (-not (Get-Module -ListAvailable -Name Az)) {
               Install-Module -Name Az -Force -AllowClobber -SkipPublisherCheck
+              Update-Module Az
           }
 
       - name: Log in to Azure using Service Principal (PowerShell)
