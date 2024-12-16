@@ -53,7 +53,7 @@ Describe 'Azure IQ Tests with Pester' {
             $result = az vm show --name $vmName --resource-group $resourceGroupName --query "hardwareProfile.vmSize" --output tsv
 
             # Assert that the VM is of the expected size
-            $expectedSize = 'Standard_DS1_v2'  # Adjust as needed
+            $expectedSize = 'Standard_B1s'  # Adjust as needed
             $result | Should -BeExactly $expectedSize
         }
 
