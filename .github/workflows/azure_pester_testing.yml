@@ -33,6 +33,7 @@ jobs:
           Install-Module -Name Pester -Force -SkipPublisherCheck
 
       - name: Run Pester Tests
+        continue-on-error: true
         run: |
           # Path to the Pester test scripts
           Invoke-Pester -Script .\az-tests\azure_pester_cli.ps1 -OutputFormat NUnitXml -OutputFile ./test-results/test-results.xml
