@@ -1,3 +1,5 @@
+Import-Module -Name Az.Resources
+
 Describe 'Azure VM Tests' {
 
     # Test 1: VM should exist
