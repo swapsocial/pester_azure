@@ -22,9 +22,9 @@ jobs:
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Install Az module
+      - name: Install Az.Resources module
         run: |
-         Install-Module -Name Az -Scope CurrentUser -Force -SkipPublisherCheck
+         Install-Module -Name Az.Resources -Scope CurrentUser -Force -SkipPublisherCheck
 
       - name: Install Pester module
         run: |
