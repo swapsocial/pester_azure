@@ -1,4 +1,6 @@
 Import-Module -Name Az.Resources
+$subscriptionId = "8dd8b7ef-db34-43f4-bbce-997ece61cb8d"
+Select-AzSubscription -Subscription $subscriptionId
 
 Describe 'Azure VM Tests' {
 
