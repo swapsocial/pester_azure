@@ -13,9 +13,15 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
 
+      - name: Uninstall AzureRM module (if present)
+        run: |
+          if (Get-Module -ListAvailable -Name AzureRM) {
+              Uninstall-Module -Name AzureRM -Force -AllowClobber
+          }
+
       - name: Install Azure PowerShell (Az module)
         run: |
-              Install-Module -Name Az.Resources -Force -AllowClobber -SkipPublisherCheck
+          Install-Module -Name Az.Resources -Force -AllowClobber -SkipPublisherCheck
 
       - name: Log in to Azure using Service Principal (PowerShell)
         run: |
