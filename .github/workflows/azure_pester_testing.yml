@@ -7,42 +7,37 @@ on:
 
 jobs:
   run-pester-tests:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Use Windows-based runner
 
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v3
 
-      - name: Uninstall AzureRM module (if present)
+      - name: Install Azure CLI
         run: |
-          if (Get-Module -ListAvailable -Name AzureRM) {
-              Uninstall-Module -Name AzureRM -Force -AllowClobber
-          }
+          Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile ./azure-cli-installer.msi
+          Start-Process msiexec.exe -ArgumentList '/i', './azure-cli-installer.msi', '/quiet', '/norestart' -NoNewWindow -Wait
 
-      - name: Install Azure PowerShell (Az module)
+      - name: Log in to Azure using Service Principal
         run: |
-          Install-Module -Name Az.Resources -Force -AllowClobber -SkipPublisherCheck
+          az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
-      - name: Log in to Azure using Service Principal (PowerShell)
+      - name: Install Az module
         run: |
-          $tenantId = "${{ secrets.AZURE_TENANT_ID }}" 
-          $clientId = "${{ secrets.AZURE_CLIENT_ID }}"
-          $clientSecret = "${{ secrets.AZURE_CLIENT_SECRET }}"
-
-          $secureSecret = ConvertTo-SecureString $clientSecret -AsPlainText -Force
-          $credentials = New-Object System.Management.Automation.PSCredential($clientId, $secureSecret)
-
-          # Ensure connection to Azure with Service Principal
-          Connect-AzAccount -ServicePrincipal -TenantId $tenantId -ApplicationId $clientId -Credential $credentials
+         Install-Module -Name Az -Scope CurrentUser -Force -SkipPublisherCheck
 
       - name: Install Pester module
         run: |
           Install-Module -Name Pester -Force -SkipPublisherCheck
 
-      - name: Set Azure Subscription and Run Pester Tests
-        continue-on-error: true
+      - name: Run Pester Tests
         run: |
-          $subscriptionId = "0b7e0b83-0035-48fe-92fe-bf1143f2e715"
-          Set-AzContext -SubscriptionId $subscriptionId
-          Invoke-Pester -Script .\az-tests\azure_pester.ps1
+          # Path to the Pester test scripts
+          Invoke-Pester -Script .\az-tests\*.ps1
         shell: pwsh
+
+      - name: Upload Pester Test Results as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pester-test-results
+          path: ./test-outputs/*.xml  # Adjust based on your test output file path
