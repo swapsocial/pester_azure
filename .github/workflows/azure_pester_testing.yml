@@ -34,7 +34,7 @@ jobs:
 
       - name: Authenticate to Azure
         run: |
-          Connect-AzAccount -ServicePrincipal -TenantId ${{ secrets.AZURE_TENANT_ID }} -ApplicationId ${{ secrets.AZURE_CLIENT_ID }}
+          Connect-AzAccount -ServicePrincipal -TenantId "${{ secrets.AZURE_TENANT_ID }}" -ApplicationId "${{ secrets.AZURE_CLIENT_ID }}"
 
       - name: Run Pester Tests
         run: |
