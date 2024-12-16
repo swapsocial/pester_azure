@@ -1,10 +1,4 @@
-Describe 'Azure CLI Tests' {
-
-    BeforeAll {
-        # Ensure that Azure CLI is authenticated
-        # Use the Service Principal login in a CI/CD environment or manually in a local environment
-        az login --service-principal -u $env:AZURE_CLIENT_ID -p $env:AZURE_CLIENT_SECRET --tenant $env:AZURE_TENANT_ID
-    }
+Describe 'Azure IQ Tests with Pester' {
 
     Context 'Check if Resource Group exists' {
 
@@ -39,7 +33,41 @@ Describe 'Azure CLI Tests' {
             $vm = $result | ConvertFrom-Json
             $vm.name | Should -BeExactly $vmName
         }
-        
+
+        It 'Should verify that the VM is running' {
+            $resourceGroupName = 'YourResourceGroupName'
+            $vmName = 'YourVMName'
+
+            # Run Azure CLI to check the power state of the VM
+            $result = az vm get-instance-view --name $vmName --resource-group $resourceGroupName --query "instanceView.statuses[1].displayStatus" --output tsv
+
+            # Assert that the VM is in a running state
+            $result | Should -BeExactly 'VM running'
+        }
+
+        It 'Should verify the VM size' {
+            $resourceGroupName = 'YourResourceGroupName'
+            $vmName = 'YourVMName'
+
+            # Run Azure CLI to check the size of the VM
+            $result = az vm show --name $vmName --resource-group $resourceGroupName --query "hardwareProfile.vmSize" --output tsv
+
+            # Assert that the VM is of the expected size
+            $expectedSize = 'Standard_DS1_v2'  # Adjust as needed
+            $result | Should -BeExactly $expectedSize
+        }
+
+        It 'Should verify the OS disk type' {
+            $resourceGroupName = 'YourResourceGroupName'
+            $vmName = 'YourVMName'
+
+            # Run Azure CLI to check the OS disk type
+            $result = az vm show --name $vmName --resource-group $resourceGroupName --query "storageProfile.osDisk.managedDisk.storageAccountType" --output tsv
+
+            # Assert that the OS disk is of the expected type
+            $expectedDiskType = 'Premium_LRS'  # Adjust as needed
+            $result | Should -BeExactly $expectedDiskType
+        }
     }
 
     AfterAll {
