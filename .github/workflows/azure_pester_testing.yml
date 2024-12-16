@@ -16,28 +16,31 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v3
 
+      # Install Azure CLI
       - name: Install Azure CLI
         run: |
           Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile ./azure-cli-installer.msi
           Start-Process msiexec.exe -ArgumentList '/i', './azure-cli-installer.msi', '/quiet', '/norestart' -NoNewWindow -Wait
 
-      - name: Log in to Azure using Service Principal
+      # Log in to Azure using Service Principal with client secret
+      - name: Log in to Azure using Service Principal (test connection)
         run: |
           az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
 
+      # Install Pester module
       - name: Install Pester module
         run: |
           Install-Module -Name Pester -Force -SkipPublisherCheck
-      - name: Install Azure PowerShell Az Module
-        run: |
-          Install-Module -Name Az -Force -AllowClobber -Scope CurrentUser
-
-      - name: Authenticate to Azure
-        run: |
-          Connect-AzAccount -ServicePrincipal -TenantId "${{ secrets.AZURE_TENANT_ID }}" -ApplicationId "${{ secrets.AZURE_CLIENT_ID }}"
 
       - name: Run Pester Tests
         run: |
           # Path to the Pester test scripts
-          Invoke-Pester -Script .\az-tests\azure_pester.ps1 -OutputFormat NUnitXml -OutputFile ./test-results/test-results.xml
+          Invoke-Pester -Script .\az-tests\azure_pester_cli.ps1 -OutputFormat NUnitXml -OutputFile ./test-results/test-results.xml
         shell: pwsh 
+      
+            # Upload test results to GitHub Actions
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pester-test-results
+          path: ./test-results/test-results.xml
